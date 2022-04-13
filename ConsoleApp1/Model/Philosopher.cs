@@ -22,7 +22,7 @@ namespace ConsoleApp1.Model
 
         public void SitToTheTable(List<Stick> availableSticks, int sushiNumber)
         {
-            Console.WriteLine(Name.ToString() + " sat to table");
+            Console.WriteLine(Name.ToString() + " sat to the table");
             AvailableSticks = availableSticks;
             Plate = new SushiPlate(sushiNumber);
             Think();
@@ -32,16 +32,21 @@ namespace ConsoleApp1.Model
         {
             foreach (var stick in AvailableSticks)
             {
-                if (stick.TookedBy != null)
+                lock (stick)
                 {
-                    Console.WriteLine(Name.ToString() + " couldn`t take stick " + stick.Id.ToString());
-                    return false;
-                }
-            }
+                    if (stick.TookedBy != null)
+                    {
+                        Console.WriteLine(Name.ToString() + " couldn`t take stick " + stick.Id.ToString());
+                        foreach (var s in SticksInHand)
+                        {
+                            s.PutDown();
+                        }
 
-            foreach (var stick in AvailableSticks)
-            {
-                TakeInHand(stick);
+                        return false;
+                    }
+
+                    TakeInHand(stick);
+                }
             }
 
             var sticks = string.Empty;
